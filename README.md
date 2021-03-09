@@ -5,7 +5,7 @@
 
 ##### 数据来源: [http://wechat.doonsec.com](http://wechat.doonsec.com)
 
-![图片演示](utools.gif)
+![](https://mmbiz.qpic.cn/mmbiz_gif/vML07fExwAcLuCt7jXGUmxSrXjOXG6KhANbYyCGaibp6sMPB8iaebRUV5EHGcaWHoibElmJGUl4eACiahMCVXFCBEA/640?wx_fmt=gif&tp=webp&wxfrom=5&wx_lazy=1)
 
 ## 🛠功能
 
@@ -52,6 +52,9 @@ https://github.com/Hatcat123/uTools_WechatDoonsec
 
 ## 🕘日志
 
+- **V 0.0.4**
+    - [x] 适应多环境配置：win、mac
+    - [x] 修改图标为静态图
 - **V 0.0.3**
     - [x] 增加`👇下一页👇`功能
     - [x] 完善`搜索`与`首页`的转换衔接🛠，使用空格回到首页。
