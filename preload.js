@@ -19,21 +19,18 @@ function error_network() {
     })
 }
 
-// utools.setExpendHeight(300)
-// setTimeout(() => {//这个计时器是等待dom刷新后 定位完成
-//     alert(1)
-// }, 5000);
 
 
 // 数据来源与接口
+// var domain = 'http://127.0.0.1:8000/'
 var domain = 'http://wechat.doonsec.com/'
 //最新接口
-var last_article = 'articles/?page=&{page}'
+var last_article = 'api/v1/articles/?page=&{page}&limit=9'
 //分类接口
 var tag_article = 'tags/?page=1&cat_id=1'
 //搜索接口
-var search_article = 'search/?keyword=&{searchword}&page=&{page}'
-//data page: 1,keyword: 1
+var search_article = 'api/v1/search/'
+//data page: 1,keyword: 1,limit:9
 
 var timeout = null
 var searchItems = null
@@ -55,12 +52,11 @@ function request_get(options) {
 }
 function request_post(options) {
     // var url = ALIYUN_MAVEN_BASE_URL.replace('${repoid}', options.type).replace('${name}', options.name)
-
-    var url = domain + search_article
-    console.log("url", url)
+ 
     var ajax = new XMLHttpRequest()
-    ajax.open('get', url)
-    ajax.send()
+    ajax.open('post', options.url)
+    ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    ajax.send(convertData(options.data))
     ajax.onreadystatechange = function () {
         if (ajax.readyState == 4) {
             if (ajax.status == 200) {
@@ -80,12 +76,8 @@ var last_query = function (page, callbackSetList) {
     request_get({
         url: domain + last_article.replace("&{page}", page),
         success: function (res) {
-
             res = JSON.parse(res)
-            console.log('查询出来的结果', res)
-
             for (const key in res.data) {
-
                 result.push({
                     title: res.data[key].title,
                     description: '⏰' + res.data[key].publish_time + '\xa0✅\xa0' + res.data[key].digest,
@@ -109,19 +101,35 @@ var last_query = function (page, callbackSetList) {
         }
     })
 }
-
+function convertData(data){ 
+    if( typeof data === 'object' ){ 
+      var convertResult = "" ;  
+      for(var c in data){  
+          
+        convertResult+= c + "=" + data[c] + "&";  
+      }  
+      convertResult=convertResult.substring(0,convertResult.length-1) 
+      return convertResult; 
+    }else{ 
+      return data; 
+    } 
+  }
+  
 var search_query = function (page, keyword, callbackSetList) {
 
     var result = []
-    request_get({
-        url: domain + search_article.replace("&{page}", page).replace("&{searchword}", keyword),
+    keyword =window.btoa(keyword)  //转换为base64
+    request_post({
+        url: domain + search_article ,
+        data:{"keyword":keyword,"page":page,"limit":9},
         success: function (res) {
+            res = JSON.parse(res)
             if (res.count == 0) {
-                callbackSetList("未查询到结果")
+              
+                callbackSetList([{title: res.message,}])
             }
             else {
-                res = JSON.parse(res)
-                console.log('查询出来的结果', res)
+              
                 for (const key in res.data) {
                     result.push({
                         title: res.data[key].title,
@@ -148,41 +156,6 @@ var search_query = function (page, keyword, callbackSetList) {
 }
 
 
-document.onkeydown = function (event) {
-    var event = event || window.event;
-    // 为了方便理解可以写成这种形式var event=event?event:window.event实现浏览器的兼容
-    var keycode = event.which || event.keyCode;
-    console.log(keycode)
-    // 火狐不支持event.keyCode支持event.which
-    switch (keycode) {
-        case 38:
-            console.log("上"); break;
-        case 39:
-            console.log("右"); break;
-        case 40:
-            console.log("下"); break;
-        case 37:
-            console.log("左"); break;
-    }
-}
-
-
-window.scroll = function () {
-    //变量scrollTop是滚动条滚动时，滚动条上端距离顶部的距离
-    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    console.log(scrollTop)
-    //变量windowHeight是可视区的高度
-    var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
-
-    //变量scrollHeight是滚动条的总高度（当前可滚动的页面的总高度）
-    var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-
-    //滚动条到底部
-    if (scrollTop + windowHeight >= scrollHeight) {
-        //要进行的操作
-        console.log(2222)
-    }
-}
 
 var result = []
 var keyword = ''
