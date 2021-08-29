@@ -1,4 +1,18 @@
+var Base64 = Base64 || require('./base64.js').Base64;
+
+function times(str, num) {
+    return num > 1 ? str += times(str, --num) : str;
+}
 //第一次加载的时候执行
+// 到头的弹窗信息
+function info_pre() {
+    utools.showMessageBox({
+        type: 'none',
+        icon: 'logo.gif',
+        title: '已经到头了',
+        message: '已经到头了💔',
+    })
+}
 // 到底的弹窗信息
 function info_end() {
     utools.showMessageBox({
@@ -6,7 +20,15 @@ function info_end() {
         icon: 'logo.gif',
         title: '已经到底了',
         message: '已经到底了💔',
-
+    })
+}
+// 到底的弹窗信息
+function info_error() {
+    utools.showMessageBox({
+        type: 'none',
+        icon: 'logo.gif',
+        title: '数据丢失',
+        message: '数据丢失了💔',
     })
 }
 function error_network() {
@@ -20,12 +42,12 @@ function error_network() {
 }
 
 
-
+// const MouseTrap = require('mousetrap')
 // 数据来源与接口
 // var domain = 'http://127.0.0.1:8000/'
-var domain = 'http://wechat.doonsec.com/'
+var domain = 'https://wechat.doonsec.com/'
 //最新接口
-var last_article = 'api/v1/articles/?page=&{page}&limit=9'
+var last_article = 'api/v1/articles/?page=&{page}&limit=8'
 //分类接口
 var tag_article = 'tags/?page=1&cat_id=1'
 //搜索接口
@@ -39,6 +61,14 @@ function request_get(options) {
     console.log("url", options.url)
     var ajax = new XMLHttpRequest()
     ajax.open('get', options.url)
+    utools_userinfo = utools.getUser()
+    if (utools_userinfo == null) {
+        visitor = "UToolsUnLogin"
+    }
+    else {
+        visitor = utools_userinfo['nickname']
+    }
+    ajax.setRequestHeader('visitor', visitor);
     ajax.send()
     ajax.onreadystatechange = function () {
         if (ajax.readyState == 4) {
@@ -52,10 +82,20 @@ function request_get(options) {
 }
 function request_post(options) {
     // var url = ALIYUN_MAVEN_BASE_URL.replace('${repoid}', options.type).replace('${name}', options.name)
- 
+
     var ajax = new XMLHttpRequest()
+    utools.getUser()
+    console.log(utools.getUser())
     ajax.open('post', options.url)
-    ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    utools_userinfo = utools.getUser()
+    if (utools_userinfo == null) {
+        visitor = "UToolsUnLogin"
+    }
+    else {
+        visitor = utools_userinfo['nickname']
+    }
+    ajax.setRequestHeader('visitor', visitor);
+    ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     ajax.send(convertData(options.data))
     ajax.onreadystatechange = function () {
         if (ajax.readyState == 4) {
@@ -77,23 +117,37 @@ var last_query = function (page, callbackSetList) {
         url: domain + last_article.replace("&{page}", page),
         success: function (res) {
             res = JSON.parse(res)
-            for (const key in res.data) {
-                result.push({
-                    title: res.data[key].title,
-                    description: '⏰' + res.data[key].publish_time + '\xa0✅\xa0' + res.data[key].digest,
-                    url: res.data[key].url,
-                    icon: 'logo.gif'// 图标(可选)
-                })
+            if (res.code != 0) {
+                // code返回不能解析了
+                info_error()
             }
-            result.push({
-                title: '共' + page + "/" + res.count + "页",
-                description: "👇下一页👇",
-                url: 'last_article',
-                icon: 'logo.gif',// 图标(可选)
-                next: true
-            })
+            else {
+                for (const key in res.data) {
+                    result.push({
+                        title: res.data[key].title,
+                        description: '⏰  ' + res.data[key].publish_time + '\xa0\xa0\xa0✅\xa0' + res.data[key].digest,
+                        url: res.data[key].url,
+                        icon: 'logo.gif'// 图标(可选)
+                    })
+                }
+                result.push({
+                    title: times('\xa0', 80) + "👆上一页👆",
+                    description: "",
+                    url: 'last_article',
 
-            callbackSetList(result)
+                    next: false
+                })
+                result.push({
+                    title: times('\xa0', 80) + "👇下一页👇",
+                    description: times('\xa0', 93) + '共' + page + "/" + res.count + "页",
+                    url: 'last_article',
+
+                    next: true
+                })
+
+                callbackSetList(result)
+            }
+
         },
         fail: function (error) {
             console.log(error)
@@ -101,51 +155,67 @@ var last_query = function (page, callbackSetList) {
         }
     })
 }
-function convertData(data){ 
-    if( typeof data === 'object' ){ 
-      var convertResult = "" ;  
-      for(var c in data){  
-          
-        convertResult+= c + "=" + data[c] + "&";  
-      }  
-      convertResult=convertResult.substring(0,convertResult.length-1) 
-      return convertResult; 
-    }else{ 
-      return data; 
-    } 
-  }
-  
+function convertData(data) {
+    if (typeof data === 'object') {
+        var convertResult = "";
+        for (var c in data) {
+            convertResult += c + "=" + data[c] + "&";
+        }
+        convertResult = convertResult.substring(0, convertResult.length - 1)
+        return convertResult;
+    } else {
+        return data;
+    }
+}
+
 var search_query = function (page, keyword, callbackSetList) {
 
     var result = []
-    keyword =window.btoa(keyword)  //转换为base64
+    keyword = keyword.replace("\\", "").replace("、", "")
+    keyword = Base64.encode(window.encodeURIComponent(keyword))  //转换为base64
     request_post({
-        url: domain + search_article ,
-        data:{"keyword":keyword,"page":page,"limit":9},
+        url: domain + search_article,
+        data: { "keyword": keyword, "page": page, "limit": 8 },
         success: function (res) {
             res = JSON.parse(res)
-            if (res.count == 0) {
-              
-                callbackSetList([{title: res.message,}])
+            if (res.code != 0) {
+                // code返回不能解析了
+                info_error()
             }
             else {
-              
-                for (const key in res.data) {
-                    result.push({
-                        title: res.data[key].title,
-                        description: '⏰' + res.data[key].publish_time + '\xa0✅\xa0' + res.data[key].digest,
-                        url: res.data[key].url,
-                        icon: 'logo.gif'// 图标(可选)
-                    })
+                if (res.count == 0) {
+
+                    callbackSetList([{ title: res.message, }])
                 }
-                result.push({
-                    title: '共' + page + "/" + res.count + "页",
-                    description: "👇下一页👇",
-                    url: 'search_article',
-                    icon: 'logo.gif',// 图标(可选)
-                    next: true
-                })
-                callbackSetList(result)
+                else if (JSON.stringify(res.data) === '{}'){
+                    info_end()
+                }
+                else {
+
+                    for (const key in res.data) {
+                        result.push({
+                            title: res.data[key].title,
+                            description: '⏰  ' + res.data[key].publish_time + '\xa0\xa0\xa0✅\xa0' + res.data[key].digest,
+                            url: res.data[key].url,
+                            icon: 'logo.gif'// 图标(可选)
+                        })
+                    }
+                    result.push({
+                        title: times('\xa0', 80) + "👆上一页👆",
+                        description: "",
+                        url: 'search_article',
+
+                        next: false
+                    })
+                    result.push({
+                        title: times('\xa0', 80) + "👇下一页👇",
+                        description: times('\xa0', 93) + '共' + page + "/" + res.count + "页",
+                        url: 'search_article',
+
+                        next: true
+                    })
+                    callbackSetList(result)
+                }
             }
         },
         fail: function (error) {
@@ -172,35 +242,61 @@ window.exports = {
 
             },
             // 子输入框内容变化时被调用 可选 (未设置则无搜索)
-            search: (action, searchWord, callbackSetList) => {
-                // 获取一些数据
-                if (searchWord !== null && searchWord !== undefined && searchWord !== '') {
-                    keyword = searchWord
-                    search_query(page = 1, keyword = searchWord, callbackSetList = callbackSetList)
-                } else {
-                    last_query(page = 1, callbackSetList = callbackSetList)
+            search: async (action, searchWord, callbackSetList) => {
+                utools.subInputFocus();
+                if ((searchWord.indexOf("、") !== -1) || (searchWord.indexOf("\\") !== -1) || (searchWord == null || searchWord == undefined || searchWord == '')) {
+                    // 获取一些数据
+                    if (searchWord !== null && searchWord !== undefined && searchWord !== '') {
+                        console.log("搜索关键字", searchWord)
+                        keyword = searchWord
+                        search_query(page = 1, keyword = searchWord, callbackSetList = callbackSetList)
+                    } else {
+                        last_query(page = 1, callbackSetList = callbackSetList)
+                    }
                 }
             },
             // 用户选择列表中某个条目时被调用
             select: (action, itemData, callbackSetList) => {
                 //  window.utools.hideMainWindow()
-                page = page + 1
+                page = page
                 const url = itemData.url
                 const next = itemData.next
                 if (next == true && url == 'last_article') {
+                    page = page + 1
                     last_query(page = page, callbackSetList = callbackSetList)
                 }
+
                 else if (next == true && url == 'search_article') {
+                    page = page + 1
+                    search_query(page = page, keyword = keyword, callbackSetList = callbackSetList)
+                }
+                else if (next == false && url == 'last_article') {
+                    page = page - 1 // 防止page<0
+                    if (page < 1) {
+                        info_pre()
+                        page = page + 1
+                        return
+                    }
+                    last_query(page = page, callbackSetList = callbackSetList)
+                }
+                else if (next == false && url == 'search_article') {
+                    page = page - 1
+                    if (page < 1) {
+                        info_pre()
+                        page = page + 1
+                        return
+                    }
                     search_query(page = page, keyword = keyword, callbackSetList = callbackSetList)
                 }
                 else {
                     //  require('electron').shell.openExternal(url)
-                    window.utools.shellOpenExternal(url)
-                    //  window.utools.outPlugin()
+                    // window.utools.shellOpenExternal(url)
+                    utools.ubrowser.goto(url)
+                        .run({ width: 1050, height: 600 })
                 }
             },
             // 子输入框为空时的占位符，默认为字符串"搜索"
-            placeholder: "高级搜索：支持’&‘，’｜‘语法"
+            placeholder: "⚠️注意Search：'、'或'\\'结尾才进行搜索"
         }
     }
 }
