@@ -291,6 +291,7 @@ window.exports = {
                 else {
                     //  require('electron').shell.openExternal(url)
                     // window.utools.shellOpenExternal(url)
+                    utools.copyText(url)
                     utools.ubrowser.goto(url)
                         .run({ width: 1050, height: 600 })
                 }

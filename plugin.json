@@ -1,27 +1,29 @@
-
 {
-    "pluginName": "Doonsec洞见微信聚合",
-    "version": "0.0.7",
-    "description": "洞见微信聚合-安全圈微信搜索_订阅号及文章内容独家收录,一搜即达",
-    "author": "AJay13",
-    "homepage": "https://wechat.doonsec.com",
-    "preload": "preload.js",
-    "logo": "logo.png",
-    "pluginSetting": {
-      "single": false,
-      "height": 0
-    },
-    "features": [
-      {
-        "code": "doon",
-        "explain": "Doonsec洞见微信聚合，安全圈的微信文章收集🎁与搜索🔍",
-        "icon": "logo.gif",
-        "cmds": [
-          "doonsec",
-          "doon",
-          "洞见",
-          "洞见网安"
-        ]
-      }
-    ]
-  }
+  "pluginName": "Doonsec洞见微信聚合精华版Pro",
+  "version": "0.0.8",
+  "description": "洞见微信聚合-安全圈微信搜索_订阅号及文章内容独家收录,一搜即达",
+  "author": "AJay13",
+  "homepage": "https://wechat.doonsec.com",
+  "preload": "preload.js",
+  "logo": "logo.png",
+  "development": {
+    "main": "http://wechat.doonsec.com"
+  },
+  "pluginSetting": {
+    "single": false,
+    "height": 0
+  },
+  "features": [
+    {
+      "code": "doon",
+      "explain": "Doonsec洞见微信聚合，安全圈的微信文章收集🎁与搜索🔍",
+      "icon": "logo.gif",
+      "cmds": [
+        "doonsec",
+        "doon",
+        "洞见",
+        "洞见网安"
+      ]
+    }
+  ]
+}
