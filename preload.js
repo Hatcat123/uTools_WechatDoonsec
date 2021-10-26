@@ -45,7 +45,7 @@ function error_network() {
 // const MouseTrap = require('mousetrap')
 // 数据来源与接口
 // var domain = 'http://127.0.0.1:8000/'
-var domain = 'https://wechat.doonsec.com/'
+var domain = 'http://wechat.doonsec.com/'
 //最新接口
 var last_article = 'api/v1/articles/?page=&{page}&limit=8'
 //分类接口
@@ -68,7 +68,7 @@ function request_get(options) {
     else {
         visitor = utools_userinfo['nickname']
     }
-    ajax.setRequestHeader('visitor', visitor);
+    ajax.setRequestHeader('visitor', Base64.encode(visitor));
     ajax.send()
     ajax.onreadystatechange = function () {
         if (ajax.readyState == 4) {
@@ -84,8 +84,6 @@ function request_post(options) {
     // var url = ALIYUN_MAVEN_BASE_URL.replace('${repoid}', options.type).replace('${name}', options.name)
 
     var ajax = new XMLHttpRequest()
-    utools.getUser()
-    console.log(utools.getUser())
     ajax.open('post', options.url)
     utools_userinfo = utools.getUser()
     if (utools_userinfo == null) {
@@ -94,7 +92,7 @@ function request_post(options) {
     else {
         visitor = utools_userinfo['nickname']
     }
-    ajax.setRequestHeader('visitor', visitor);
+    ajax.setRequestHeader('visitor', Base64.encode(visitor));
     ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     ajax.send(convertData(options.data))
     ajax.onreadystatechange = function () {
@@ -171,7 +169,6 @@ function convertData(data) {
 var search_query = function (page, keyword, callbackSetList) {
 
     var result = []
-    keyword = keyword.replace("\\", "").replace("、", "")
     keyword = Base64.encode(window.encodeURIComponent(keyword))  //转换为base64
     request_post({
         url: domain + search_article,
@@ -187,7 +184,7 @@ var search_query = function (page, keyword, callbackSetList) {
 
                     callbackSetList([{ title: res.message, }])
                 }
-                else if (JSON.stringify(res.data) === '{}'){
+                else if (JSON.stringify(res.data) === '{}') {
                     info_end()
                 }
                 else {
@@ -244,7 +241,7 @@ window.exports = {
             // 子输入框内容变化时被调用 可选 (未设置则无搜索)
             search: async (action, searchWord, callbackSetList) => {
                 utools.subInputFocus();
-                if ((searchWord.indexOf("、") !== -1) || (searchWord.indexOf("\\") !== -1) || (searchWord == null || searchWord == undefined || searchWord == '')) {
+                if ((searchWord.split("")[searchWord.split("").length - 1] == " ")) {
                     // 获取一些数据
                     if (searchWord !== null && searchWord !== undefined && searchWord !== '') {
                         console.log("搜索关键字", searchWord)
@@ -253,6 +250,9 @@ window.exports = {
                     } else {
                         last_query(page = 1, callbackSetList = callbackSetList)
                     }
+                }
+                else if (searchWord == null && searchWord == undefined && searchWord == '') {
+                    last_query(page = 1, callbackSetList = callbackSetList)
                 }
             },
             // 用户选择列表中某个条目时被调用
@@ -297,7 +297,7 @@ window.exports = {
                 }
             },
             // 子输入框为空时的占位符，默认为字符串"搜索"
-            placeholder: "⚠️注意Search：'、'或'\\'结尾才进行搜索"
+            placeholder: "⚠️注意Search：空格结尾才进行搜索"
         }
     }
 }
