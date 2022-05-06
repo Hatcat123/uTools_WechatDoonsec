@@ -47,11 +47,11 @@ function error_network() {
 // var domain = 'http://127.0.0.1:8000/'
 var domain = 'http://wechat.doonsec.com/'
 //最新接口
-var last_article = 'api/v1/articles/?page=&{page}&limit=8'
+var last_article = 'api/v1/new/articles/?page=&{page}&limit=8'
 //分类接口
 var tag_article = 'tags/?page=1&cat_id=1'
 //搜索接口
-var search_article = 'api/v1/search/'
+var search_article = 'api/v1/new/search/'
 //data page: 1,keyword: 1,limit:9
 
 var timeout = null
@@ -117,7 +117,8 @@ var last_query = function (page, callbackSetList) {
             res = JSON.parse(res)
             if (res.code != 0) {
                 // code返回不能解析了
-                info_error()
+                // info_error()
+                console.log("code返回不能解析了")
             }
             else {
                 for (const key in res.data) {
@@ -149,7 +150,7 @@ var last_query = function (page, callbackSetList) {
         },
         fail: function (error) {
             console.log(error)
-            error_network()
+            // error_network()
         }
     })
 }
@@ -177,7 +178,8 @@ var search_query = function (page, keyword, callbackSetList) {
             res = JSON.parse(res)
             if (res.code != 0) {
                 // code返回不能解析了
-                info_error()
+                // info_error()
+                console.log("code返回不能解析了")
             }
             else {
                 if (res.count == 0) {
@@ -185,7 +187,9 @@ var search_query = function (page, keyword, callbackSetList) {
                     callbackSetList([{ title: res.message, }])
                 }
                 else if (JSON.stringify(res.data) === '{}') {
-                    info_end()
+                    // info_end()
+                    console.log("已经到底了")
+
                 }
                 else {
 
@@ -217,7 +221,7 @@ var search_query = function (page, keyword, callbackSetList) {
         },
         fail: function (error) {
             console.log(error)
-            error_network()
+            // error_network()
         }
     })
 }
@@ -273,7 +277,7 @@ window.exports = {
                 else if (next == false && url == 'last_article') {
                     page = page - 1 // 防止page<0
                     if (page < 1) {
-                        info_pre()
+                        // info_pre()
                         page = page + 1
                         return
                     }
@@ -282,7 +286,7 @@ window.exports = {
                 else if (next == false && url == 'search_article') {
                     page = page - 1
                     if (page < 1) {
-                        info_pre()
+                        // info_pre()
                         page = page + 1
                         return
                     }
@@ -297,7 +301,7 @@ window.exports = {
                 }
             },
             // 子输入框为空时的占位符，默认为字符串"搜索"
-            placeholder: "⚠️注意Search：空格结尾才进行搜索"
+            placeholder: "⚠️注意搜索：要以空格结尾才执行搜索方法"
         }
     }
 }

@@ -1,7 +1,7 @@
 {
   "pluginName": "Doonsec洞见微信聚合精华版Pro",
   "version": "0.1.0",
-  "description": "洞见微信聚合-安全圈微信搜索_订阅号及文章内容独家收录,一搜即达",
+  "description": "洞见微信聚合-安全圈微信搜索_订阅号及文章内容收录,一搜即达",
   "author": "AJay13",
   "homepage": "https://wechat.doonsec.com",
   "preload": "preload.js",
