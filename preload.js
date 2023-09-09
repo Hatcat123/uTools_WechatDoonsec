@@ -3,43 +3,6 @@ var Base64 = Base64 || require('./base64.js').Base64;
 function times(str, num) {
     return num > 1 ? str += times(str, --num) : str;
 }
-//第一次加载的时候执行
-// 到头的弹窗信息
-function info_pre() {
-    utools.showMessageBox({
-        type: 'none',
-        icon: 'logo.gif',
-        title: '已经到头了',
-        message: '已经到头了💔',
-    })
-}
-// 到底的弹窗信息
-function info_end() {
-    utools.showMessageBox({
-        type: 'none',
-        icon: 'logo.gif',
-        title: '已经到底了',
-        message: '已经到底了💔',
-    })
-}
-// 到底的弹窗信息
-function info_error() {
-    utools.showMessageBox({
-        type: 'none',
-        icon: 'logo.gif',
-        title: '数据丢失',
-        message: '数据丢失了💔',
-    })
-}
-function error_network() {
-    utools.showMessageBox({
-        type: 'error',
-        icon: 'logo.gif',
-        title: '连接失败',
-        message: '🤡网路连接失败，请检查网路💔',
-
-    })
-}
 
 
 // const MouseTrap = require('mousetrap')
@@ -227,7 +190,6 @@ var search_query = function (page, keyword, callbackSetList) {
 }
 
 
-
 var result = []
 var keyword = ''
 var page = 1
@@ -245,7 +207,8 @@ window.exports = {
             // 子输入框内容变化时被调用 可选 (未设置则无搜索)
             search: async (action, searchWord, callbackSetList) => {
                 utools.subInputFocus();
-                if ((searchWord.split("")[searchWord.split("").length - 1] == " ")) {
+                // if ((searchWord.split("")[searchWord.split("").length - 1] == " ")) {
+                if (searchWord != " ") {
                     // 获取一些数据
                     if (searchWord !== null && searchWord !== undefined && searchWord !== '') {
                         console.log("搜索关键字", searchWord)
@@ -256,6 +219,9 @@ window.exports = {
                     }
                 }
                 else if (searchWord == null && searchWord == undefined && searchWord == '') {
+                    last_query(page = 1, callbackSetList = callbackSetList)
+                }
+                else {
                     last_query(page = 1, callbackSetList = callbackSetList)
                 }
             },
@@ -294,14 +260,14 @@ window.exports = {
                 }
                 else {
                     //  require('electron').shell.openExternal(url)
-                    // window.utools.shellOpenExternal(url)
-                    utools.copyText(url)
-                    utools.ubrowser.goto(url)
-                        .run({ width: 1050, height: 600 })
+                    window.utools.shellOpenExternal(url)
+                    // utools.copyText(url)
+                    // utools.ubrowser.goto(url)
+                    // .run({ width: 1050, height: 600 })
                 }
             },
             // 子输入框为空时的占位符，默认为字符串"搜索"
-            placeholder: "⚠️注意搜索：要以空格结尾才执行搜索方法"
+            placeholder: "搜索关键字"
         }
     }
 }
